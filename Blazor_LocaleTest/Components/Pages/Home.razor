@@ -1,0 +1,54 @@
+﻿@page "/"
+@using System.Globalization
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+@inject IStringLocalizer<Resources.Resource> Loc
+
+<PageTitle>Home</PageTitle>
+
+<h1>@Loc["Hello"]</h1>
+
+<div class="row pt-1">
+    <select @bind="selectedCulture">
+        @foreach (var cultureInfo in cultureInfos)
+        {
+            <option value="@cultureInfo.Name">@cultureInfo.DisplayName</option>
+        }
+    </select>
+</div>
+
+
+@code {
+
+    private List<CultureInfo> cultureInfos = new();
+
+
+    private CultureInfo selectedCulture
+    {
+        get => CultureInfo.CurrentCulture;
+
+        set
+        {
+            if (CultureInfo.CurrentCulture != value)
+            {
+                var uri = new Uri(Navigation.Uri)
+                    .GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
+                var cultureEscaped = Uri.EscapeDataString(value.Name);
+                var uriEscaped = Uri.EscapeDataString(uri);
+
+                Navigation.NavigateTo(
+                    $"Culture/Set?culture={cultureEscaped}&redirectUri={uriEscaped}",
+                    forceLoad: true);
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        cultureInfos.Add(new CultureInfo("en-US"));
+        cultureInfos.Add(new CultureInfo("ja-JP"));
+        cultureInfos.Add(new CultureInfo("zh-CN"));
+        cultureInfos.Add(new CultureInfo("fr-FR"));
+
+    }
+}
